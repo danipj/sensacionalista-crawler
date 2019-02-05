@@ -13,11 +13,6 @@ class NewsTitlesSpider(CrawlSpider):
     rules = (Rule(LinkExtractor(allow=(), restrict_css=('div.page-nav',),unique=True), callback="parse_page", follow= True,),)
     
     def parse_page(self, response):
-        #site = html.fromstring(response.body_as_unicode())
-        #print(site)
-        h3 = response.css('h3').css('a::text')
-        for t in h3:
-            title = t.get()
-            print(title)
-            with open("sensa.txt","a") as f:
-                f.write(title+'\n')
+        titles = response.css('.td-main-content h3 a::attr(title)').getall()
+        for title in titles:
+            yield {'title': title}
