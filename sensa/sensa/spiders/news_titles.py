@@ -2,7 +2,6 @@
 import scrapy
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
-from lxml import html
 
 
 class NewsTitlesSpider(CrawlSpider):
@@ -10,9 +9,11 @@ class NewsTitlesSpider(CrawlSpider):
     allowed_domains = ['www.sensacionalista.com.br']
     start_urls = ['https://www.sensacionalista.com.br/?s=%20+']
 
-    rules = (Rule(LinkExtractor(allow=(), restrict_css=('div.page-nav',),unique=True), callback="parse_page", follow= True,),)
+    rules = (Rule(LinkExtractor(allow=(), restrict_css=('div.page-nav',)), callback="parse_page", follow= True,),)
     
     def parse_page(self, response):
-        titles = response.css('.td-main-content h3 a::attr(title)').getall()
-        for title in titles:
-            yield {'title': title}
+        thumbs = response.css('.td-main-content .td-module-thumb')
+        for thumb in thumbs:
+            yield {'title': thumb.css('a::attr(title)').get(), 
+                    'img': thumb.css('a img::attr(src)').get(), 
+                    'link': thumb.css('a::attr(href)').get()}
